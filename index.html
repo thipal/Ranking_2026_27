@@ -266,7 +266,7 @@ function render(){
   if(ui.tab==="ranking") h+=yearSwitch(ys)+catSwitch(LC)+(rs.length?findBox():'')+viewRanking(LC[ui.cat],rs);
   else if(ui.tab==="torneos") h+=yearSwitch(ys)+viewTorneos(rs,LC);
   else h+=viewGestionar();
-  h+='</div></main><footer><strong>Actualizado el 24/11/2026</strong> · Dos categorías: 1ª hasta hándicap '+fmtHc(catLimit())+' incluido, 2ª desde '+cat2From()+' (la que asigna GolfDirecto en cada torneo); cada jugador figura en la categoría de su primer torneo de la temporada · Ranking = suma de los '+nBest()+' mejores resultados Stableford de cada jugador en la temporada (si ha jugado menos torneos, cuentan todos) · los resultados tachados no cuentan · empates en el ranking: misma posición (T)</footer>';
+  h+='</div></main><footer><strong>Actualizado el 27/11/2026</strong> · Dos categorías: 1ª hasta hándicap '+fmtHc(catLimit())+' incluido, 2ª desde '+cat2From()+' (la que asigna GolfDirecto en cada torneo); cada jugador figura en la categoría de su primer torneo de la temporada · Ranking = suma de los '+nBest()+' mejores resultados Stableford de cada jugador en la temporada (si ha jugado menos torneos, cuentan todos) · los resultados tachados no cuentan · empates en el ranking: misma posición (T)</footer>';
   document.getElementById("app").innerHTML=h;
   var f=document.getElementById("rd-date"); if(f&&!f.value&&!ui.editId) f.value=todayIso();
   applyFilter(); applyFind();
@@ -283,13 +283,13 @@ function viewRanking(L,rs){
   if(!rs.length) return '<div class="board empty">Todavía no se ha registrado ningún torneo esta temporada.'+(ui.canEdit?' Impórtalo desde GolfDirecto en la pestaña Gestionar.':'')+'</div>';
   var N=nBest();
   var h='<div class="section-head"><h2>Ranking · '+catName(ui.cat)+'</h2><p class="hint">Suma de los '+N+' mejores resultados Stableford · J = torneos jugados · en verde = cuenta para el Ranking · tachado = no cuenta · en negrita = ganador del torneo</p></div>';
-  h+='<div class="board"><table><thead><tr><th class="l sticky">Pos</th><th class="l sticky2">Jugador</th><th title="Handicap">HC</th><th>J</th><th title="Suma de los '+N+' mejores">Ranking</th><th title="Suma de todos los resultados">Total</th><th title="Media Stableford">Media</th>';
+  h+='<div class="board"><table><thead><tr><th class="l sticky">Pos</th><th class="l sticky2">Jugador</th><th>J</th><th title="Suma de los '+N+' mejores">Ranking</th><th title="Suma de todos los resultados">Total</th><th title="Media Stableford">Media</th>';
   rs.forEach(function(r){h+='<th class="rd" title="'+esc(r.name||"")+'">'+shortDate(r.date)+'</th>';});
   h+='</tr></thead><tbody>';
   L.forEach(function(r){
     var p=player(r.id);
     h+='<tr data-find="'+esc(norm(r.name))+'" class="'+(r.pos<=3?'top':'')+'"><td class="pos sticky">'+r.posLabel+'</td><td class="l sticky2"><div class="name">'+esc(r.name)+'</div>'+(r.dropped?'<span class="chip">'+r.dropped+' descartado'+(r.dropped>1?'s':'')+'</span>':'')+'</td>';
-    h+='<td>'+hcCell(p)+'</td><td>'+r.played+'</td><td class="total">'+r.total+'</td><td>'+r.all+'</td><td>'+f1(r.avg)+'</td>';
+    h+='<td>'+r.played+'</td><td class="total">'+r.total+'</td><td>'+r.all+'</td><td>'+f1(r.avg)+'</td>';
     rs.forEach(function(x){var v=r.per[x.id]; h+='<td class="rd'+(v?(v.used?' use':' drop')+(v.win?' best':''):' miss')+'" title="'+(v?v.s+' Stableford · '+catName(v.cat)+(v.used?'':' · no cuenta'):'No jugó')+'">'+(v?v.s+(v.cat!==ui.cat?'<small class="stb">'+(v.cat===1?'1ª':'2ª')+'</small>':''):'–')+'</td>';});
     h+='</tr>';
   });
@@ -305,9 +305,9 @@ function viewTorneos(rs,LC){ var _fb=findBox();
     var rows=dayRows(r,c); if(!rows.length) return;
     var w=rows.filter(function(x){return x.pos===1;});
     h+='<div class="prize"><span class="k">'+catName(c)+'</span><span class="w">'+w.map(function(x){return esc(x.name);}).join(', ')+'</span><span class="hint">ganador'+(w.length>1?'es':'')+' · '+w[0].pts+' pts Stableford · '+rows.length+' jugadores</span></div>';
-    h+='<div class="board"><table><thead><tr><th class="l">Pos</th><th class="l">Jugador</th><th title="Handicap actual">HC</th><th>Stb.</th><th class="l" title="¿Está entre sus '+nBest()+' mejores de la temporada?">Ranking</th><th title="Posición actual en el Ranking de su categoría">Pos. ranking</th></tr></thead><tbody>';
+    h+='<div class="board"><table><thead><tr><th class="l">Pos</th><th class="l">Jugador</th><th>Stb.</th><th class="l" title="¿Está entre sus '+nBest()+' mejores de la temporada?">Ranking</th><th title="Posición actual en el Ranking de su categoría">Pos. ranking</th></tr></thead><tbody>';
     rows.forEach(function(x){var o=byId[x.id], g=o&&o.g, v=g&&g.per[r.id];
-      h+='<tr data-find="'+esc(norm(x.name))+'" class="'+(x.pos<=3?'top':'')+'"><td class="pos">'+x.posLabel+'</td><td class="l"><div class="name">'+esc(x.name)+'</div></td><td>'+hcCell(player(x.id))+'</td><td class="total">'+x.pts+'</td><td class="l">'+(v?(v.used?'<span class="chip solid" style="--c:var(--green)">Cuenta</span>':'<span class="chip">Descartado</span>'):'')+'</td><td>'+(g?g.posLabel+(o.c!==c?' <span class="hint">('+(o.c===1?'1ª':'2ª')+')</span>':''):'–')+'</td></tr>';});
+      h+='<tr data-find="'+esc(norm(x.name))+'" class="'+(x.pos<=3?'top':'')+'"><td class="pos">'+x.posLabel+'</td><td class="l"><div class="name">'+esc(x.name)+'</div></td><td class="total">'+x.pts+'</td><td class="l">'+(v?(v.used?'<span class="chip solid" style="--c:var(--green)">Cuenta</span>':'<span class="chip">Descartado</span>'):'')+'</td><td>'+(g?g.posLabel+(o.c!==c?' <span class="hint">('+(o.c===1?'1ª':'2ª')+')</span>':''):'–')+'</td></tr>';});
     h+='</tbody></table></div>';
   });
   return h;
